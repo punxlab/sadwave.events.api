@@ -63,6 +63,13 @@ CREATE TABLE IF NOT EXISTS `Accounts` (
 	FOREIGN KEY(`RoleId`) REFERENCES `Roles`(`Id`)
 );
 
+CREATE TABLE IF NOT EXISTS `EventsPhotos` (
+	`EventUrl` varchar ( 255 ) NOT NULL PRIMARY KEY,
+	`PhotoUrl` varchar ( 255 ) NOT NULL,
+	`PhotoWidth` integer NOT NULL,
+	`PhotoHeight` integer NOT NULL
+);
+
 CREATE UNIQUE INDEX IF NOT EXISTS `Roles_UX_Roles_Name` ON `Roles` (
 	`Name` DESC
 );

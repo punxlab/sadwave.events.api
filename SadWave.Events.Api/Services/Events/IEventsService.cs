@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace SadWave.Events.Api.Services.Events
@@ -10,5 +11,7 @@ namespace SadWave.Events.Api.Services.Events
 		Task SaveEventsAsync();
 
 		Task DeleteEventsAsync();
+
+		Task SetCustomEventPhotoAsync(Uri eventUrl, Uri photoUrl);
 	}
 }

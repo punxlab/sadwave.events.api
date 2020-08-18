@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using SadWave.Events.Api.Common.Events;
+using SadWave.Events.Api.Common.Images;
 using SadWave.Events.Api.Common.Logger;
 using SadWave.Events.Api.Common.Notifications;
 using SadWave.Events.Api.Converters;
@@ -18,34 +19,41 @@ namespace SadWave.Events.Api.Services.Events
 	public class EventsService : IEventsService
 	{
 		private readonly IEventsRepository _eventsRepository;
+		private readonly IEventsPhotoRepository _eventsPhotoRepository;
 		private readonly ICitiesRepository _citiesRepository;
 		private readonly IEventsParser _eventsParser;
 		private readonly IDevicesRepository _devicesRepository;
 		private readonly INotificationsService _notificationsService;
+		private readonly IImageSizeProvider _imageSizeProvider;
 		private readonly ILogger _logger;
 
 		public EventsService(
 			IEventsRepository eventsRepository,
 			ICitiesRepository citiesRepository,
-			IEventsParser eventsParser,
+			IEventsPhotoRepository eventsPhotoRepository,
 			IDevicesRepository devicesRepository,
+			IEventsParser eventsParser,
 			INotificationsService notificationsService,
+			IImageSizeProvider imageSizeProvider,
 			ILogger logger)
 		{
 			_eventsRepository = eventsRepository ?? throw new ArgumentNullException(nameof(eventsRepository));
+			_eventsPhotoRepository = eventsPhotoRepository ?? throw new ArgumentNullException(nameof(eventsPhotoRepository));
 			_citiesRepository = citiesRepository ?? throw new ArgumentNullException(nameof(citiesRepository));
 			_eventsParser = eventsParser ?? throw new ArgumentNullException(nameof(eventsParser));
 			_devicesRepository = devicesRepository ?? throw new ArgumentNullException(nameof(devicesRepository));
 			_notificationsService = notificationsService ?? throw new ArgumentNullException(nameof(notificationsService));
+			_imageSizeProvider = imageSizeProvider ?? throw new ArgumentNullException(nameof(imageSizeProvider));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		}
 
-		public Task<IEnumerable<Event>> GetCityEventsAsync(string cityAlias)
+		public async Task<IEnumerable<Event>> GetCityEventsAsync(string cityAlias)
 		{
 			if (string.IsNullOrWhiteSpace(cityAlias))
 				throw new ArgumentException("Value cannot be null or whitespace.", nameof(cityAlias));
 
-			return GetEventsByCityAsync(cityAlias);
+			var events = await GetEventsByCityAsync(cityAlias);
+			return events.Select(EventConverter.Convert);
 		}
 
 		public async Task SaveEventsAsync()
@@ -68,6 +76,8 @@ namespace SadWave.Events.Api.Services.Events
 						continue;
 					}
 
+					await RemoveObsoleteCustomEventPhotoAsync(storedEvents, parsedEvents);
+
 					_logger.Information($"Has new events for {city.Alias}.");
 					var devicesRecords = await _devicesRepository.GetDevicesAsync(city.Alias);
 
@@ -87,6 +97,58 @@ namespace SadWave.Events.Api.Services.Events
 			}
 		}
 
+		private async Task RemoveObsoleteCustomEventPhotoAsync(List<EventRecord> storedEvents, List<ParsedEventData> parsedEvents)
+		{
+			foreach (var storedEvent in storedEvents)
+			{
+
+				if (!parsedEvents.Any(e => e.Url == storedEvent.Url))
+				{
+					try
+					{
+						await _eventsPhotoRepository.RemoveEventPhotoAsync(storedEvent.Url);
+					}
+					catch(Exception e)
+					{
+						_logger.Error(e);
+					}
+				}
+			}
+		}
+
+		public async Task SetCustomEventPhotoAsync(Uri eventUrl, Uri photoUrl)
+		{
+			if (eventUrl is null)
+				throw new ArgumentNullException(nameof(eventUrl));
+			if (photoUrl is null)
+				throw new ArgumentNullException(nameof(photoUrl));
+
+			var cities = await _citiesRepository.GetAsync();
+			foreach (var city in cities)
+			{
+				var events = _eventsRepository.GetCityEvents(city.Alias);
+				var eventValue = events.SingleOrDefault(e => e.Url == eventUrl);
+				if (eventValue != null)
+				{
+					var size = await _imageSizeProvider.GetSizeByUriAsync(photoUrl);
+					if (size != null && size.Width >0 && size.Height > 0) {
+						eventValue.Photo = photoUrl;
+
+						await _eventsPhotoRepository.SetPhotoAsync(
+							new EventPhoto {
+								EventUri = eventValue.Url,
+								PhotoUri = eventValue.Photo,
+								PhotoWidth = size.Width,
+								PhotoHeight = size.Height
+							}
+						);
+
+						break;
+					}
+				}
+			}
+		}
+
 		public async Task DeleteEventsAsync()
 		{
 			var cities = await _citiesRepository.GetAsync();
@@ -96,15 +158,13 @@ namespace SadWave.Events.Api.Services.Events
 			}
 		}
 
-		private async Task<IEnumerable<Event>> GetEventsByCityAsync(string cityAlias)
+		private async Task<IEnumerable<EventRecord>> GetEventsByCityAsync(string cityAlias)
 		{
 			var cityRecord = await _citiesRepository.GetAsync(cityAlias);
 			if (cityRecord == null)
 				throw new CityNotFoundException();
 
-			var events = _eventsRepository.GetCityEvents(cityAlias);
-
-			return events.Select(EventConverter.Convert);
+			return _eventsRepository.GetCityEvents(cityAlias);
 		}
 
 		private void Notify(Notification notification)

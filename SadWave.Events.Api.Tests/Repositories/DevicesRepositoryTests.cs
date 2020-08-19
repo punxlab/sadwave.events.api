@@ -245,12 +245,12 @@ namespace SadWave.Events.Api.Tests.Repositories
 
 		private CitiesRepository CreateCitiesRepository()
 		{
-			return new CitiesRepository(ConnectionTestory);
+			return new CitiesRepository(ConnectionFactory);
 		}
 
 		private DevicesRepository CreateSut()
 		{
-			return  new DevicesRepository(ConnectionTestory);
+			return  new DevicesRepository(ConnectionFactory);
 		}
 	}
 }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
-using SadWave.Events.Api.Common.Storages;
 using SadWave.Events.Api.Repositories.Events;
 
 namespace SadWave.Events.Api.Tests.Repositories

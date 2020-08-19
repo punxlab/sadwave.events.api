@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS `Accounts` (
 
 CREATE TABLE IF NOT EXISTS `EventsPhotos` (
 	`EventUrl` varchar ( 255 ) NOT NULL PRIMARY KEY,
-	`PhotoUrl` varchar ( 255 ) NOT NULL,
+	`PhotoUrl` varchar ( 255 ),
 	`PhotoWidth` integer NOT NULL,
 	`PhotoHeight` integer NOT NULL
 );

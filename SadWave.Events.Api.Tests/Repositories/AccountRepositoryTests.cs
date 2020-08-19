@@ -104,7 +104,7 @@ namespace SadWave.Events.Api.Tests.Repositories
 
 		private AccountsRepository CreateSut()
 		{
-			return new AccountsRepository(ConnectionTestory);
+			return new AccountsRepository(ConnectionFactory);
 		}
 	}
 }

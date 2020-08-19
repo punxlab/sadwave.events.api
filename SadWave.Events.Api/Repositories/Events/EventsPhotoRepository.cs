@@ -20,7 +20,7 @@ namespace SadWave.Events.Api.Repositories.Events
 			if (eventUrl is null)
 				throw new ArgumentNullException(nameof(eventUrl));
 
-			return DeleteEventPhotoAsync(eventUrl);
+			return DeleteEventPhotoAsync(eventUrl.ToString());
 		}
 
 		public Task<EventPhoto> GetEventPhotoAsync(Uri eventUrl)
@@ -28,26 +28,29 @@ namespace SadWave.Events.Api.Repositories.Events
 			if (eventUrl is null)
 				throw new ArgumentNullException(nameof(eventUrl));
 
-			return SelectEventPhotoAsync(eventUrl);
+			return SelectEventPhotoAsync(eventUrl.ToString());
 		}
 
 		public Task SetPhotoAsync(EventPhoto photo)
 		{
 			if (photo is null)
 				throw new ArgumentNullException(nameof(photo));
-			if (photo.EventUri is null)
-				throw new ArgumentNullException(nameof(photo.EventUri));
-			if (photo.PhotoUri is null)
-				throw new ArgumentNullException(nameof(photo.PhotoUri));
+			if (photo.EventUrl is null)
+				throw new ArgumentNullException(nameof(photo.EventUrl));
 
-			return AddEventPhotoAsync(photo.EventUri, photo.PhotoUri, photo.PhotoWidth, photo.PhotoHeight);
+			return AddEventPhotoAsync(
+				photo.EventUrl.ToString(),
+				photo.PhotoUrl?.ToString(),
+				photo.PhotoWidth,
+				photo.PhotoHeight
+			);
 		}
 
-		public async Task<EventPhoto> SelectEventPhotoAsync(Uri eventUrl)
+		private async Task<EventPhoto> SelectEventPhotoAsync(string eventUrl)
 		{
 			using (var connection = await _connectionFactory.CreateConnectionAsync())
 			{
-				return await connection.QuerySingleOrDefaultAsync<EventPhoto>(
+				var record = await connection.QuerySingleOrDefaultAsync<EventPhotoRecord>(
 					@"
 SELECT
 	E.EventUrl AS EventUrl,
@@ -61,10 +64,21 @@ WHERE E.EventUrl = @eventUrl",
 						eventUrl
 					}
 				);
+
+				if (record == null)
+					return null;
+
+				return new EventPhoto
+				{
+					EventUrl = new Uri(record.EventUrl),
+					PhotoUrl = record.PhotoUrl == null ? null : new Uri(record.PhotoUrl),
+					PhotoWidth = record.PhotoWidth,
+					PhotoHeight = record.PhotoHeight
+				};
 			}
 		}
 
-		private async Task AddEventPhotoAsync(Uri eventUrl, Uri photoUrl, int photoWidth, int photoHeight)
+		private async Task AddEventPhotoAsync(string eventUrl, string photoUrl, int photoWidth, int photoHeight)
 		{
 			using (var connection = await _connectionFactory.CreateConnectionAsync())
 			{
@@ -82,7 +96,7 @@ VALUES (@eventUrl, @photoUrl, @photoWidth, @photoHeight)",
 			}
 		}
 
-		private async Task DeleteEventPhotoAsync(Uri eventUrl)
+		private async Task DeleteEventPhotoAsync(string eventUrl)
 		{
 			using (var connection = await _connectionFactory.CreateConnectionAsync())
 			{

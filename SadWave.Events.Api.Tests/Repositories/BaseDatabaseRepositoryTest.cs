@@ -7,7 +7,7 @@ namespace SadWave.Events.Api.Tests.Repositories
 	public abstract class BaseDatabaseRepositoryTest
 	{
 		private readonly string _databaseName;
-		protected ConnectionFactory ConnectionTestory;
+		protected ConnectionFactory ConnectionFactory;
 
 		protected BaseDatabaseRepositoryTest(string databaseName)
 		{
@@ -22,8 +22,8 @@ namespace SadWave.Events.Api.Tests.Repositories
 				File.Delete(_databaseName);
 			}
 
-			ConnectionTestory = new ConnectionFactory(_databaseName);
-			var dataBaseInitializer = new DatabaseInitializer(ConnectionTestory);
+			ConnectionFactory = new ConnectionFactory(_databaseName);
+			var dataBaseInitializer = new DatabaseInitializer(ConnectionFactory);
 			dataBaseInitializer.InitializeSchema();
 			dataBaseInitializer.InitializeDictionaries();
 		}

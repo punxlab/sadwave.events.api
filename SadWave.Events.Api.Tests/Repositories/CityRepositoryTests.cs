@@ -158,7 +158,7 @@ namespace SadWave.Events.Api.Tests.Repositories
 
 		private CitiesRepository CreateSut()
 		{
-			return new CitiesRepository(ConnectionTestory);
+			return new CitiesRepository(ConnectionFactory);
 		}
 	}
 }

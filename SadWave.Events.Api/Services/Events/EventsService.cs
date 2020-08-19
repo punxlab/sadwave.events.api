@@ -53,7 +53,23 @@ namespace SadWave.Events.Api.Services.Events
 				throw new ArgumentException("Value cannot be null or whitespace.", nameof(cityAlias));
 
 			var events = await GetEventsByCityAsync(cityAlias);
-			return events.Select(EventConverter.Convert);
+			var list = events.ToList();
+
+			foreach (var item in list)
+			{
+				if (item.Url == null)
+					continue;
+
+				var photo = await _eventsPhotoRepository.GetEventPhotoAsync(item.Url);
+				if (photo != null)
+				{
+					item.Photo = photo.PhotoUrl;
+					item.PhotoHeight = photo.PhotoHeight;
+					item.PhotoWidth = photo.PhotoWidth;
+				}
+			}
+
+			return list.Select(EventConverter.Convert);
 		}
 
 		public async Task SaveEventsAsync()

@@ -63,9 +63,6 @@ namespace SadWave.Events.Api.Controllers
 			if (body.EventUrl == null || string.IsNullOrWhiteSpace(body.EventUrl.ToString()))
 				return BadRequest("Event URL is null or empty.");
 
-			if (body.PhotoUri == null || string.IsNullOrWhiteSpace(body.PhotoUri.ToString()))
-				return BadRequest("Photo URL is null or empty.");
-
 			await _eventsService.SetCustomEventPhotoAsync(body.EventUrl, body.PhotoUri);
 			return Ok();
 		}

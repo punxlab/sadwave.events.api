@@ -120,8 +120,6 @@ namespace SadWave.Events.Api.Services.Events
 		{
 			if (eventUrl is null)
 				throw new ArgumentNullException(nameof(eventUrl));
-			if (photoUrl is null)
-				throw new ArgumentNullException(nameof(photoUrl));
 
 			var cities = await _citiesRepository.GetAsync();
 			foreach (var city in cities)
@@ -130,21 +128,21 @@ namespace SadWave.Events.Api.Services.Events
 				var eventValue = events.SingleOrDefault(e => e.Url == eventUrl);
 				if (eventValue != null)
 				{
-					var size = await _imageSizeProvider.GetSizeByUriAsync(photoUrl);
-					if (size != null && size.Width >0 && size.Height > 0) {
-						eventValue.Photo = photoUrl;
-
-						await _eventsPhotoRepository.SetPhotoAsync(
-							new EventPhoto {
-								EventUrl = eventValue.Url,
-								PhotoUrl = eventValue.Photo,
-								PhotoWidth = size.Width,
-								PhotoHeight = size.Height
-							}
-						);
-
-						break;
+					ImageSize size = new ImageSize();
+					if (photoUrl != null) {
+						size = await _imageSizeProvider.GetSizeByUriAsync(photoUrl);
 					}
+
+					await _eventsPhotoRepository.SetPhotoAsync(
+						new EventPhoto {
+							EventUrl = eventValue.Url,
+							PhotoUrl = eventValue.Photo,
+							PhotoWidth = size.Width,
+							PhotoHeight = size.Height
+						}
+					);
+
+					break;
 				}
 			}
 		}

@@ -152,7 +152,7 @@ namespace SadWave.Events.Api.Services.Events
 					await _eventsPhotoRepository.SetPhotoAsync(
 						new EventPhoto {
 							EventUrl = eventValue.Url,
-							PhotoUrl = eventValue.Photo,
+							PhotoUrl = photoUrl,
 							PhotoWidth = size.Width,
 							PhotoHeight = size.Height
 						}

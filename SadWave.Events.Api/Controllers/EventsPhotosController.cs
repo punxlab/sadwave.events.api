@@ -19,7 +19,7 @@ namespace SadWave.Events.Api.Controllers
 		}
 
 		[HttpPost]
-		//[Authorize(Roles = RoleName.Admin)]
+		[Authorize(Roles = RoleName.Admin)]
 		public async Task<IActionResult> SetEventPhoto([FromBody] SetEventPhotoRequestBody body)
 		{
 			if (body == null)

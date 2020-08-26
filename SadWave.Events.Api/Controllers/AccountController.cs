@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SadWave.Events.Api.Models.Account;
 using SadWave.Events.Api.Services.Accounts;
@@ -18,6 +19,7 @@ namespace SadWave.Events.Api.Controllers
 		}
 
 		[HttpPost]
+		[Authorize(Roles = RoleName.Admin)]
 		public async Task<IActionResult> Create([FromBody] CreateAccountRequestBody body)
 		{
 			try

@@ -16,8 +16,7 @@ namespace SadWave.Events.Api.Controllers
 		private readonly IAccountsService _accountsService;
 		private readonly AuthenticationOptions _options;
 
-		public AuthenticationController(
-			IAccountsService accountsService, AuthenticationOptions options)
+		public AuthenticationController(IAccountsService accountsService, AuthenticationOptions options)
 		{
 			_accountsService = accountsService ?? throw new ArgumentNullException(nameof(accountsService));
 			_options = options ?? throw new ArgumentNullException(nameof(options));

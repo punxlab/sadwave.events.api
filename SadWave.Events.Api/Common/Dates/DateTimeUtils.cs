@@ -25,7 +25,7 @@ namespace SadWave.Events.Api.Common.Dates
 				date = Parse(stringDate);
 				return true;
 			}
-			catch (Exception e)
+			catch (Exception)
 			{
 				date = DateTime.MinValue;
 				return false;

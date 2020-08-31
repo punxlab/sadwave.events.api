@@ -137,6 +137,7 @@ namespace SadWave.Events.Api
 								IssuerSigningKey = authenticationKey
 							};
 						});
+				services.AddCors();
 				services.AddMvc();
 			}
 			catch (Exception e)

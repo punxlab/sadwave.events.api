@@ -155,6 +155,7 @@ namespace SadWave.Events.Api
 			}
 
 			app.UseAuthentication();
+			app.UseCors(builder => builder.AllowAnyOrigin());
 			app.UseMvc();
 		}
 	}

@@ -141,7 +141,7 @@ namespace SadWave.Events.Api.Services.Events
 			foreach (var city in cities)
 			{
 				var events = _eventsRepository.GetCityEvents(city.Alias);
-				var eventValue = events.SingleOrDefault(e => e.Url == eventUrl);
+				var eventValue = events.SingleOrDefault(e => Equals(e.Url, eventUrl));
 				if (eventValue != null)
 				{
 					ImageSize size = new ImageSize();
@@ -193,5 +193,13 @@ namespace SadWave.Events.Api.Services.Events
 			_notificationsService.Notify(notification);
 			_notificationsService.MarkCityAsNotified(notification.CityAlias);
 		}
+
+		private bool Equals(Uri first, Uri second)
+        {
+			if (first == null || second == null)
+				return false;
+
+			return first.AbsoluteUri.TrimEnd('/') == second.AbsoluteUri.TrimEnd('/');
+        }
 	}
 }

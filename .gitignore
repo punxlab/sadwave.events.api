@@ -273,3 +273,4 @@ __pycache__/
 appsettings.json
 # End of https://www.gitignore.io/api/aspnetcore
 *.p12
+/SadWave.Events.Api/Properties/ServiceDependencies/SadwaveEventsApi - Web Deploy/profile.arm.json
